@@ -7,10 +7,10 @@ const SPIRAL = {
   color:       "#000000",   // color de la espiral
   background:  "#ffffff",   // color del fondo (los huecos entre bandas)
 
-  turns:       7,           // nº de espirales (vueltas por brazo) · muévelo para + / − aros
-  arms:        2,           // nº de brazos · 2 = centro con dos lengüitas (como pepi)
+  turns:       7,           // nº de vueltas por brazo · muévelo para + / − aros
+  arms:        4,           // nº de espirales (brazos) · 4 = cuatro lengüitas en el centro
   hole:        40,          // hueco central · 0 = punta cerrada · 40 = "ojo" tipo pepi
-  thickness:   0.5,         // grosor de banda · 0.5 = banda y hueco iguales
+  thickness:   0.6,         // grosor de banda · 0.5 = banda=hueco · >0.5 = menos separadas · <0.5 = más finas
 
   centerX:     50,          // centro de la espiral · horizontal, en dvw  (50 = medio)
   centerY:     50,          // centro de la espiral · vertical,   en dvh  (50 = medio)
