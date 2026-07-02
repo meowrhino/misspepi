@@ -14,10 +14,16 @@
   wrap.style.left = SPIRAL.centerX + "dvw";
   wrap.style.top  = SPIRAL.centerY + "dvh";
 
-  // 3) coloca las piernas: tamaño + separación del fondo + lado
+  // 3) coloca las piernas: tamaño + separación del fondo + anclaje horizontal.
+  //    ANCHOR_PCT = punto de la imagen (en % de su ancho) que se alinea con anchorX.
+  //    83% = pie derecho → las piernas quedan a la derecha igual en móvil y desktop.
+  //    (Es propio del asset: si cambias la imagen, recalcúlalo. 50 = centro, 18 = pie izq.)
+  const ANCHOR_PCT = 83;
   legs.style.height    = LEGS.size   + "dvh";
   legs.style.bottom    = LEGS.bottom + "dvh";
-  legs.style[LEGS.side] = LEGS.offset + "dvw";   // "right" o "left"
+  legs.style.left      = LEGS.anchorX + "dvw";
+  legs.style.right     = "auto";
+  legs.style.transform = "translateX(-" + ANCHOR_PCT + "%)";
 
   // 4) gira por GPU (respeta a quien pide menos movimiento)
   if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;

@@ -21,8 +21,8 @@ const SPIRAL = {
 
 // ─── PIERNAS (primer plano) ──────────────────────────────────────
 const LEGS = {
-  size:    140,      // alto en dvh  (grande: la parte de arriba se sale de pantalla)
-  bottom:  10,       // la punta de los pies, a esta distancia del fondo, en dvh
-  side:    "right",  // lado de anclaje: "right" o "left"
-  offset:  0,        // separación a ese lado, en dvw
+  size:    140,   // alto en dvh  (grande: la parte de arriba se sale de pantalla)
+  bottom:  10,    // la punta de los pies, a esta distancia del fondo, en dvh
+  anchorX: 72,    // dónde queda el CENTRO DE LOS PIES, en dvw (0=izq · 50=medio · 100=der)
+                  // se mantiene igual en móvil y desktop
 };
