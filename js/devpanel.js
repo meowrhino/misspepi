@@ -23,16 +23,30 @@
     { obj: LEGS,   key: "anchorX",     label: "piernas · anclaje X (dvw)", kind: "range", min: 0, max: 100, step: 1 },
   ];
 
+  // Layout en columna (etiqueta encima, control debajo a todo lo ancho).
+  // El panel mide como mucho 320px SIEMPRE (móvil y escritorio, ver
+  // build()), así que en vez de mantener dos layouts (uno para cada
+  // tamaño) se usa uno solo que cabe de sobra en cualquier ancho —
+  // menos código y cero roturas al probar el responsive.
   function fieldRow(f, onChange) {
     const row = document.createElement("div");
-    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;";
+    row.style.cssText = "padding:7px 0;font-size:12px;";
 
-    const label = document.createElement("label");
+    const labelRow = document.createElement("div");
+    labelRow.style.cssText = "display:flex;justify-content:space-between;gap:8px;color:#ccc;margin-bottom:4px;";
+    const label = document.createElement("span");
     label.textContent = f.label;
-    label.style.cssText = "flex:0 0 168px;color:#ccc;";
-    row.appendChild(label);
+    labelRow.appendChild(label);
+    let out;
+    if (f.kind === "range") {
+      out = document.createElement("output");
+      out.textContent = f.obj[f.key];
+      out.style.cssText = "color:#1f5cff;font-variant-numeric:tabular-nums;flex:0 0 auto;";
+      labelRow.appendChild(out);
+    }
+    row.appendChild(labelRow);
 
-    let input, out;
+    let input;
     if (f.kind === "bool") {
       input = document.createElement("input");
       input.type = "checkbox";
@@ -42,17 +56,14 @@
       input = document.createElement("input");
       input.type = "color";
       input.value = f.obj[f.key];
-      input.style.cssText = "width:40px;height:24px;border:none;background:none;cursor:pointer;";
+      input.style.cssText = "width:100%;height:26px;border:none;background:none;cursor:pointer;";
       input.addEventListener("input", () => { f.obj[f.key] = input.value; onChange(); });
     } else {
       input = document.createElement("input");
       input.type = "range";
       input.min = f.min; input.max = f.max; input.step = f.step;
       input.value = f.obj[f.key];
-      input.style.cssText = "flex:1;accent-color:#1f5cff;";
-      out = document.createElement("output");
-      out.textContent = f.obj[f.key];
-      out.style.cssText = "flex:0 0 44px;text-align:right;color:#1f5cff;font-variant-numeric:tabular-nums;";
+      input.style.cssText = "width:100%;accent-color:#1f5cff;";
       input.addEventListener("input", () => {
         f.obj[f.key] = parseFloat(input.value);
         out.textContent = f.obj[f.key];
@@ -60,7 +71,6 @@
       });
     }
     row.appendChild(input);
-    if (out) row.appendChild(out);
     return row;
   }
 
@@ -90,7 +100,7 @@
     const panel = document.createElement("div");
     panel.id = "devpanel";
     panel.style.cssText =
-      "position:fixed;top:0;right:0;bottom:0;width:min(320px,86vw);z-index:9999;" +
+      "position:fixed;top:0;right:0;bottom:0;width:min(360px,86vw);z-index:9999;" +
       "background:rgba(15,15,18,.94);color:#eee;font-family:ui-monospace,monospace;" +
       "padding:16px;overflow-y:auto;transform:translateX(100%);transition:transform .25s ease;" +
       "box-shadow:-8px 0 24px rgba(0,0,0,.35);";
@@ -98,14 +108,29 @@
 
     const title = document.createElement("div");
     title.textContent = "ajustes (local)";
-    title.style.cssText = "font-size:13px;color:#e8b04a;margin-bottom:10px;";
+    title.style.cssText = "font-size:13px;color:#e8b04a;margin-bottom:6px;";
     panel.appendChild(title);
+
+    // Tamaño de pantalla actual + qué breakpoint es (mismo corte de 768px
+    // que usa css/welcome.css). Así, si haces una captura mientras pruebas
+    // el responsive, queda claro EN QUÉ tamaño se vio ese ajuste — no solo
+    // los valores, también el contexto de pantalla en el que se decidieron.
+    const viewport = document.createElement("div");
+    viewport.style.cssText = "font-size:11px;color:#8ab4ff;margin-bottom:10px;";
+    panel.appendChild(viewport);
+    function breakpointName(w) { return w < 768 ? "móvil" : w < 1024 ? "tablet" : "escritorio"; }
+    function updateViewport() {
+      viewport.textContent = window.innerWidth + " × " + window.innerHeight + " px · " + breakpointName(window.innerWidth);
+    }
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
 
     // Bloque de datos SIEMPRE visible con los valores actuales, en texto.
     // Está pensado para salir en una captura de pantalla: el portapapeles
     // del botón "copiar" no aparece en un screenshot, esto sí — así que
     // cuando la clienta deje la espiral como le guste y haga captura, la
-    // imagen ya lleva los números exactos para reproducirlo.
+    // imagen ya lleva los números exactos para reproducirlo (y, con el
+    // dato de arriba, en qué tamaño de pantalla).
     const readout = document.createElement("pre");
     readout.style.cssText =
       "font-size:10.5px;line-height:1.5;background:#000;color:#8f8;padding:10px;" +
