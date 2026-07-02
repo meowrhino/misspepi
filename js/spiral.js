@@ -3,7 +3,28 @@
 //  (la espiral es un SVG vectorial dibujado por matemáticas)
 // ════════════════════════════════════════════════════════════════
 (function () {
-  const CX = 500, CY = 500, MAXR = 470, STEP = 0.05;
+  const CX = 500, CY = 500, MAXR = 470, STEP = 0.05, DISC_R = 500;
+
+  // Geometría real del dibujo, para que welcome.js pueda calcular cuánto
+  // agrandar la espiral sin duplicar estos números "a mano".
+  window.SPIRAL_GEOMETRY = {
+    discR: DISC_R,
+    bandsMaxR: MAXR,
+    // Al ser una espiral (no un círculo), la última vuelta de cada brazo
+    // remata en un ángulo concreto: mirando justo "detrás" de ese remate
+    // las bandas llegan menos lejos que en el resto. Este es el radio que
+    // las bandas alcanzan SIEMPRE, mires al ángulo que mires — depende
+    // solo de vueltas/brazos/hueco, así que se recalcula solo si los
+    // cambias desde el panel. (Deducción: en cualquier ángulo, la banda
+    // más exterior de un brazo cualquiera está a menos de una vuelta
+    // completa de distancia angular del remate más cercano entre los N
+    // brazos repartidos por igual; en el peor de los casos esa distancia
+    // es 1/(arms·turns) de la vuelta total.)
+    worstBandsRadius(cfg) {
+      const { turns, arms, hole } = cfg;
+      return hole + (MAXR - hole) * (1 - 1 / (arms * turns));
+    },
+  };
 
   // smoothstep: 0→1 con pendiente 0 en los extremos (transición sin codo, fluida)
   const smooth = t => t * t * (3 - 2 * t);

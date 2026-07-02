@@ -11,11 +11,14 @@ body {
 }
 
 /* ---- fondo: espiral hipnótica girando ----
-   El cuadrado es grande para cubrir la pantalla al girar; el centro
-   real (500,500 del SVG) queda en left/top, que fija config.js.        */
+   width/height/left/top reales los calcula js/welcome.js (spiralDiameterPx):
+   el círculo siempre crece lo justo para cubrir la esquina de pantalla más
+   lejana al centro, así nunca se ve la esquina blanca sea cual sea la
+   posición del centro o el tamaño de pantalla. Esto de aquí es solo un
+   tamaño de emergencia por si el JS aún no ha corrido.                   */
 #spiralWrap {
   position: fixed; top: 50%; left: 50%;
-  width: 170vmax; height: 170vmax;
+  width: 200vmax; height: 200vmax;
   transform: translate(-50%, -50%);
   z-index: 0; pointer-events: none;
 }

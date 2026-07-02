@@ -23,7 +23,7 @@
     { obj: LEGS,   key: "anchorX",     label: "piernas · anclaje X (dvw)", kind: "range", min: 0, max: 100, step: 1 },
   ];
 
-  function fieldRow(f) {
+  function fieldRow(f, onChange) {
     const row = document.createElement("div");
     row.style.cssText = "display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;";
 
@@ -37,13 +37,13 @@
       input = document.createElement("input");
       input.type = "checkbox";
       input.checked = !!f.obj[f.key];
-      input.addEventListener("change", () => { f.obj[f.key] = input.checked; rebuildWelcome(); });
+      input.addEventListener("change", () => { f.obj[f.key] = input.checked; onChange(); });
     } else if (f.kind === "color") {
       input = document.createElement("input");
       input.type = "color";
       input.value = f.obj[f.key];
       input.style.cssText = "width:40px;height:24px;border:none;background:none;cursor:pointer;";
-      input.addEventListener("input", () => { f.obj[f.key] = input.value; rebuildWelcome(); });
+      input.addEventListener("input", () => { f.obj[f.key] = input.value; onChange(); });
     } else {
       input = document.createElement("input");
       input.type = "range";
@@ -56,7 +56,7 @@
       input.addEventListener("input", () => {
         f.obj[f.key] = parseFloat(input.value);
         out.textContent = f.obj[f.key];
-        rebuildWelcome();
+        onChange();
       });
     }
     row.appendChild(input);
@@ -101,7 +101,21 @@
     title.style.cssText = "font-size:13px;color:#e8b04a;margin-bottom:10px;";
     panel.appendChild(title);
 
-    FIELDS.forEach(f => panel.appendChild(fieldRow(f)));
+    // Bloque de datos SIEMPRE visible con los valores actuales, en texto.
+    // Está pensado para salir en una captura de pantalla: el portapapeles
+    // del botón "copiar" no aparece en un screenshot, esto sí — así que
+    // cuando la clienta deje la espiral como le guste y haga captura, la
+    // imagen ya lleva los números exactos para reproducirlo.
+    const readout = document.createElement("pre");
+    readout.style.cssText =
+      "font-size:10.5px;line-height:1.5;background:#000;color:#8f8;padding:10px;" +
+      "border-radius:6px;white-space:pre-wrap;user-select:all;margin-bottom:12px;";
+    panel.appendChild(readout);
+    function updateReadout() { readout.textContent = buildCopyText(); }
+
+    function onChange() { rebuildWelcome(); updateReadout(); }
+    FIELDS.forEach(f => panel.appendChild(fieldRow(f, onChange)));
+    updateReadout();
 
     const copyBtn = document.createElement("button");
     copyBtn.textContent = "copiar config.js";
