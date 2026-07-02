@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pruebas",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/meowrhino/Desktop/misspepi/.claude/serve.mjs"],
+      "port": 5178
+    }
+  ]
+}

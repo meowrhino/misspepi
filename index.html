@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Miss Pepi</title>
+  <link rel="stylesheet" href="css/welcome.css">
+</head>
+<body>
+  <!-- fondo: espiral SVG (se dibuja y anima desde js/) -->
+  <div id="spiralWrap" aria-hidden="true">
+    <svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+      <circle id="spiralDisc" cx="500" cy="500" r="500" fill="#fff"/>
+      <g id="spiralGroup"></g>
+    </svg>
+  </div>
+
+  <img class="logo" src="ASSETS/logo.webp" alt="Miss Pepi">
+  <a class="entrar" id="entrar" href="#">entrar</a>
+  <img class="legs" src="ASSETS/piernas/legs.png" alt="">
+
+  <script src="js/config.js"></script>
+  <script src="js/spiral.js"></script>
+  <script src="js/welcome.js"></script>
+</body>
+</html>

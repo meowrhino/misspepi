@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pruebas · espirales matemáticas</title>
+<style>
+  :root{ --blue:#1f5cff; --ink:#111; --bg:#0f0f12; --card:#fff; --muted:#8a8a93; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:#eee;
+        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+  header{ padding:32px 24px 8px; }
+  h1{ margin:0; font-size:22px; font-weight:600; }
+  header p{ margin:6px 0 0; color:var(--muted); font-size:14px; max-width:640px; line-height:1.6; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+         gap:20px; padding:24px; }
+  .card{ background:#1a1a1f; border:1px solid #2a2a32; border-radius:14px; overflow:hidden;
+         display:flex; flex-direction:column; }
+  .stage{ background:var(--card); aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; }
+  .stage svg{ width:100%; height:100%; display:block; }
+  .meta{ padding:14px 16px; }
+  .meta h2{ margin:0 0 4px; font-size:15px; font-weight:600; }
+  .meta code{ display:block; color:var(--blue); font-size:12px; margin-bottom:6px;
+              font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .meta p{ margin:0; color:var(--muted); font-size:12.5px; line-height:1.5; }
+  .spin{ transform-origin:500px 500px; animation:spin var(--dur,24s) linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  @media(prefers-reduced-motion:reduce){ .spin{ animation:none; } }
+
+  /* laboratorio */
+  .lab{ padding:24px; border-top:1px solid #2a2a32; margin:12px 24px 40px;
+        background:#1a1a1f; border:1px solid #2a2a32; border-radius:14px; }
+  .lab h2{ margin:0 0 16px; font-size:16px; }
+  .lab-body{ display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:start; }
+  .lab-stage{ background:#fff; border-radius:12px; aspect-ratio:1/1; }
+  .lab-stage svg{ width:100%; height:100%; }
+  .controls{ display:flex; flex-direction:column; gap:14px; }
+  .ctrl{ display:grid; grid-template-columns:120px 1fr 54px; align-items:center; gap:10px; font-size:13px; }
+  .ctrl label{ color:#ccc; }
+  .ctrl output{ color:var(--blue); font-variant-numeric:tabular-nums; text-align:right; }
+  input[type=range]{ width:100%; accent-color:var(--blue); }
+  .seg{ display:flex; gap:8px; flex-wrap:wrap; }
+  .seg button{ background:#26262e; color:#ddd; border:1px solid #33333d; border-radius:8px;
+               padding:6px 12px; font-size:13px; cursor:pointer; }
+  .seg button.on{ background:var(--blue); border-color:var(--blue); color:#fff; }
+  .row{ display:flex; align-items:center; gap:10px; font-size:13px; color:#ccc; }
+  input[type=color]{ width:38px; height:26px; border:none; background:none; cursor:pointer; }
+  @media(max-width:720px){ .lab-body{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>pruebas · espirales generadas con matemáticas</h1>
+  <p>Cada espiral está dibujada con una fórmula distinta y gira sobre su centro fijo (efecto hipnótico por GPU, gasta casi nada). Compara cuál se parece más a la referencia. Abajo tienes un laboratorio con sliders para afinar la exacta.</p>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="lab">
+  <h2>laboratorio · afina la espiral perfecta</h2>
+  <div class="lab-body">
+    <div class="lab-stage"><svg id="labSvg" viewBox="0 0 1000 1000"></svg></div>
+    <div class="controls">
+      <div class="seg" id="typeSeg"></div>
+      <div class="ctrl"><label>vueltas</label><input type="range" id="turns" min="3" max="20" step="1" value="9"><output id="turnsO"></output></div>
+      <div class="ctrl"><label>grosor banda</label><input type="range" id="thick" min="0.2" max="0.9" step="0.02" value="0.5"><output id="thickO"></output></div>
+      <div class="ctrl"><label>hueco central</label><input type="range" id="hole" min="0" max="0.2" step="0.005" value="0.05"><output id="holeO"></output></div>
+      <div class="ctrl"><label>brazos</label><input type="range" id="arms" min="1" max="4" step="1" value="2"><output id="armsO"></output></div>
+      <div class="ctrl"><label>velocidad (s)</label><input type="range" id="speed" min="4" max="60" step="1" value="24"><output id="speedO"></output></div>
+      <div class="row"><span>color</span><input type="color" id="color" value="#1f5cff">
+        <label class="row"><input type="checkbox" id="reverse"> girar al revés</label></div>
+      <p style="color:var(--muted);font-size:12px;margin:4px 0 0;line-height:1.5">
+        Dime los valores que más te gusten (o hazme captura) y dejo esa espiral fija en el welcome.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const CX=500, CY=500, MAXR=470, STEP=0.05;
+
+// ---- generadores de fórmula (devuelven {paths} rellenos) ----
+// Banda rellena entre dos bordes: r_out(θ) y r_in = max(r0, r_out - w).
+// Cerca del centro el borde interior se pega al círculo r0 → la banda se afila en punta curva (como pepi).
+function bandPaths(rOf, w, turns, arms, r0){
+  const thetaMax=2*Math.PI*turns, arcOff=2*Math.PI/arms;
+  let paths=[];
+  for(let a=0;a<arms;a++){
+    const off=a*arcOff; let out="", inn=[];
+    for(let th=0; th<=thetaMax; th+=STEP){
+      const ro=rOf(th), ri=Math.max(r0, ro-w);
+      out+=(th===0?"M ":"L ")+(CX+ro*Math.cos(th+off)).toFixed(1)+" "+(CY+ro*Math.sin(th+off)).toFixed(1)+" ";
+      inn.push([(CX+ri*Math.cos(th+off)).toFixed(1),(CY+ri*Math.sin(th+off)).toFixed(1)]);
+    }
+    let back="";
+    for(let k=inn.length-1;k>=0;k--) back+="L "+inn[k][0]+" "+inn[k][1]+" ";
+    paths.push(out+back+"Z");
+  }
+  return paths;
+}
+function archimedean(turns, thickRatio, arms=1, r0=0){
+  const thetaMax=2*Math.PI*turns, b=(MAXR-r0)/thetaMax;
+  const w=2*Math.PI*b/arms*thickRatio;            // ancho de banda; con N brazos, se divide entre N
+  return {paths:bandPaths(th=>r0+b*th, w, turns, arms, r0)};
+}
+function logarithmic(turns, thickRatio, arms=1, r0=0){
+  const thetaMax=2*Math.PI*turns;
+  const start=r0>0?r0:MAXR*0.02;
+  const k=Math.log(MAXR/start)/thetaMax;
+  const w=MAXR*0.13/arms*thickRatio;
+  return {paths:bandPaths(th=>start*Math.exp(k*th), w, turns, arms, r0||start*0.6)};
+}
+function fermat(turns, thickRatio, arms=1, r0=0){
+  const thetaMax=2*Math.PI*turns;
+  const A=r0*r0, B=(MAXR*MAXR-r0*r0)/thetaMax;    // r = √(r0² + B·θ)
+  const w=MAXR*0.11/arms*thickRatio;
+  return {paths:bandPaths(th=>Math.sqrt(A+B*th), w, turns, arms, r0)};
+}
+const GENS={ archimedean, logarithmic, fermat };
+
+function svgSpiral(gen, opts){
+  const {turns=9, thick=0.5, arms=1, r0=0, color="#1f5cff", dur=24, reverse=false, ring=true}=opts;
+  const {paths}=GENS[gen](turns, thick, arms, r0);
+  const dir = reverse ? "reverse" : "normal";
+  let inner = paths.map(d=>`<path d="${d}" fill="${color}" stroke="none"/>`).join("");
+  const ringEl = ring ? `<circle cx="${CX}" cy="${CY}" r="${MAXR}" fill="#fff" stroke="${color}" stroke-width="8"/>` : "";
+  return `<g class="spin" style="--dur:${dur}s;animation-direction:${dir}">${ringEl}${inner}</g>`;
+}
+
+// ---- tarjetas ----
+const CARDS=[
+  {gen:"archimedean", opts:{turns:9,thick:0.5}, title:"Arquímedes · 1 brazo", formula:"r = b · θ",
+   note:"Banda rellena que se afila en punta hacia el centro. Un solo brazo → una lengüeta."},
+  {gen:"archimedean", opts:{turns:7,thick:0.5,arms:2,r0:36}, title:"Arquímedes · doble brazo + hueco", formula:"r = r₀ + b · θ  (×2)",
+   note:"Dos brazos rellenos, punta afilada y círculo central. Clava el centro de pepi."},
+  {gen:"logarithmic", opts:{turns:6,thick:0.6}, title:"Logarítmica", formula:"r = a · e^(k·θ)",
+   note:"Estilo nautilus: las bandas crecen hacia fuera. Centro muy apretado, más orgánica."},
+  {gen:"fermat", opts:{turns:11,thick:0.55}, title:"Fermat", formula:"r = c · √θ",
+   note:"Las bandas se juntan hacia fuera (efecto galaxia). Reparto de área uniforme."},
+];
+const grid=document.getElementById("grid");
+CARDS.forEach(c=>{
+  const el=document.createElement("div"); el.className="card";
+  el.innerHTML=`<div class="stage"><svg viewBox="0 0 1000 1000">${svgSpiral(c.gen,c.opts)}</svg></div>
+    <div class="meta"><h2>${c.title}</h2><code>${c.formula}</code><p>${c.note}</p></div>`;
+  grid.appendChild(el);
+});
+
+// ---- laboratorio ----
+const state={ gen:"archimedean", turns:9, thick:0.5, hole:0.05, arms:2, color:"#1f5cff", dur:24, reverse:false };
+const seg=document.getElementById("typeSeg");
+[["archimedean","Arquímedes"],["logarithmic","Logarítmica"],["fermat","Fermat"]].forEach(([k,label])=>{
+  const b=document.createElement("button"); b.textContent=label; b.dataset.k=k;
+  if(k===state.gen) b.classList.add("on");
+  b.onclick=()=>{ state.gen=k; [...seg.children].forEach(x=>x.classList.toggle("on",x.dataset.k===k)); render(); };
+  seg.appendChild(b);
+});
+function bind(id, key, fmt){ const inp=document.getElementById(id), out=document.getElementById(id+"O");
+  const upd=()=>{ state[key]=parseFloat(inp.value); if(out) out.textContent=fmt?fmt(inp.value):inp.value; render(); };
+  inp.addEventListener("input",upd); upd();
+}
+bind("turns","turns"); bind("thick","thick",v=>Number(v).toFixed(2));
+bind("hole","hole",v=>Number(v).toFixed(3)); bind("arms","arms");
+bind("speed","speed",v=>v); document.getElementById("speed").addEventListener("input",e=>{state.dur=+e.target.value;render();});
+document.getElementById("color").addEventListener("input",e=>{state.color=e.target.value;render();});
+document.getElementById("reverse").addEventListener("change",e=>{state.reverse=e.target.checked;render();});
+function render(){
+  document.getElementById("labSvg").innerHTML=svgSpiral(state.gen,{
+    turns:state.turns, thick:state.thick, arms:state.arms, r0:state.hole*MAXR,
+    color:state.color, dur:state.dur, reverse:state.reverse });
+}
+render();
+</script>
+</body>
+</html>

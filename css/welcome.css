@@ -1,0 +1,60 @@
+/* ════════════════════════════════════════════════════════════════
+   WELCOME · Miss Pepi   ·   mobile-first
+   ════════════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: #fff;
+  overflow: hidden;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* ---- fondo: espiral hipnótica girando, centro fijo ---- */
+#spiralWrap {
+  position: fixed; top: 50%; left: 50%;
+  width: 170vmax; height: 170vmax;         /* cuadrado grande: cubre la pantalla al girar */
+  transform: translate(-50%, -50%);
+  z-index: 0; pointer-events: none;
+}
+#spiralWrap svg { width: 100%; height: 100%; display: block; }
+#spiralGroup { transform-origin: 500px 500px; }
+
+/* ---- logo Miss Pepi ---- */
+.logo {
+  position: fixed; top: 3vh; left: 5vw;
+  width: 64vw; max-width: 420px; z-index: 3;
+  filter: drop-shadow(0 0 7px #fff) drop-shadow(0 0 7px #fff);  /* halo para leer sobre negro */
+}
+
+/* ---- enlace entrar ---- */
+.entrar {
+  position: fixed; left: 6vw; top: 19vh; z-index: 3;
+  font-size: clamp(26px, 8vw, 40px);
+  color: #0a0a0a; text-decoration: none; letter-spacing: .02em;
+  text-shadow: 0 0 8px #fff, 0 0 8px #fff, 0 0 4px #fff;        /* halo para leer sobre negro */
+}
+.entrar::after {
+  content: ""; display: block; height: 2px; width: 0;
+  background: #0a0a0a; margin-top: 2px; transition: width .35s ease;
+}
+.entrar:hover::after, .entrar:focus::after { width: 100%; }
+
+/* ---- capa frontal: piernas ---- */
+.legs {
+  position: fixed; right: 0; bottom: 0;
+  height: 60vh; max-width: 82vw;
+  object-fit: contain; object-position: bottom right;
+  z-index: 2; pointer-events: none;
+  user-select: none; -webkit-user-drag: none;
+}
+
+/* ---- pantallas grandes ---- */
+@media (min-width: 768px) {
+  .logo   { top: 4vh; left: 4vw; width: min(42vw, 560px); }
+  .entrar { top: 32vh; left: 6vw; font-size: clamp(40px, 5vw, 64px); }
+  .legs   { height: 92vh; max-width: 55vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #spiralGroup { animation: none; }
+}
