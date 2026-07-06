@@ -14,11 +14,11 @@
   background: #fff;
 }
 
-/* botón "menu" — misma esquina en contact y about */
+/* botón "menu" — misma esquina en contact y about, a la izquierda */
 .page-menu-btn {
   position: absolute;
   top: 1.5rem;
-  right: 1.5rem;
+  left: 1.5rem;
   border: none;
   background: none;
   font-family: inherit;
@@ -50,7 +50,6 @@
 }
 
 .contact-mail {
-  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(1.5rem, 5vw, 2.75rem);
   color: var(--c-contact);
   text-decoration: none;
@@ -63,7 +62,6 @@
 }
 
 .contact-instagram {
-  font-family: Georgia, "Times New Roman", serif;
   font-size: 0.9rem;
   color: #888;
   text-decoration: none;
@@ -89,7 +87,6 @@
   width: 100%;
   height: fit-content;
   margin: auto 0;
-  font-family: Georgia, "Times New Roman", serif;
 }
 
 .about-text {

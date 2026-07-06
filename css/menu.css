@@ -1,96 +1,84 @@
 /* ════════════════════════════════════════════════════════════════
-   MENÚ CORTINA · Miss Pepi
-   6 tiras horizontales apiladas que cubren la pantalla. Entran
-   alternando lados (1ª izq, 2ª der…) y escalonadas; al elegir, la
-   cortina se queda hasta que la vista carga y luego sale en orden
-   inverso. La lógica (clases, tiempos, orden) vive en js/menu.js;
-   aquí solo la estética y las transiciones.
+   MENÚ · Miss Pepi
+   Solo texto: las palabras aparecen escalonadas (flotando sobre la
+   página) y luego el fondo blanco se cierra detrás. Al elegir, el
+   fondo se retira primero y las palabras se van las últimas. La
+   lógica y el sorteo de tamaños/letra viven en js/menu.js; aquí solo
+   estética y transiciones.
 
-   Tiempos: llegan como custom properties desde el JS (no duplicamos
-   los números de config.js):
-     --strip-ms    duración de entrada/salida de cada tira
-     --stagger-ms  retardo entre tiras (el "efecto cortina")
-   Por tira, el JS pone --i (posición en el escalonado) y --c (color
-   de la categoría, para la letra sorteada).
+   Tiempos (custom properties que inyecta el JS desde config.js):
+     --word-ms     fade de cada palabra
+     --bg-ms       fade del fondo blanco
+     --stagger-ms  retardo entre palabras
+   Por palabra, el JS pone --i (posición en el escalonado), --c (color
+   de la categoría para la letra sorteada) y el font-size sorteado.
    ════════════════════════════════════════════════════════════════ */
 
-/* ---- overlay: pila de tiras a pantalla completa ----
+/* ---- overlay: columna de palabras alineada a la izquierda ----
    Por encima de #app-view / #welcome-view, por debajo del devpanel
-   (9999). [hidden] lo apaga del todo entre aperturas.               */
+   (9999). El fondo es transparente hasta que entra .bg-in.          */
 #menu-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
   display: flex;
   flex-direction: column;
-  width: 100vw;
-  height: 100dvh;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1.1rem;
+  padding-left: 8vw;
+
+  background: transparent;
+  transition: background var(--bg-ms, 600ms) ease;
 }
 #menu-overlay[hidden] { display: none; }
+#menu-overlay.bg-in { background: #fff; }
 
-/* ---- cada tira: 1/6 del alto, ancho completo ----
-   Fondo opaco (tapa del todo lo de debajo). Estética sobria: blanco
-   con una línea fina de separación y las tiras pares con un blanco
-   apenas roto, para que se lea el apilado sin ruido.                */
-.menu-strip {
-  flex: 1 1 0;
-  min-height: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+/* ---- cada palabra: texto y nada más ----
+   El halo blanco hace legible la palabra mientras flota sobre la
+   espiral o las fotos, antes de que llegue el fondo.                */
+.menu-word {
   border: none;
-  border-bottom: 1px solid #111;
-  background: #fff;
-  color: #111;
-  font-family: Georgia, "Times New Roman", serif;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  /* el font-size lo sortea el JS en cada apertura */
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: lowercase;
+  text-align: left;
+  color: #000;
+  text-shadow: 0 0 8px #fff, 0 0 16px #fff;
   cursor: pointer;
 
-  /* estado de reposo = fuera de pantalla, según el lado de entrada.
-     .is-open las trae a 0; al cerrar vuelven a este mismo desplazamiento. */
-  transform: translateX(var(--x-out, -100%));
-  transition: transform var(--strip-ms, 420ms) cubic-bezier(0.22, 1, 0.36, 1);
-  /* el retardo escalonado sale del índice --i que pone el JS */
-  transition-delay: calc(var(--i, 0) * var(--stagger-ms, 90ms));
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity   var(--word-ms, 500ms) ease,
+    transform var(--word-ms, 500ms) ease;
+  transition-delay: calc(var(--i, 0) * var(--stagger-ms, 70ms));
 }
-.menu-strip:last-child { border-bottom: none; }
-.menu-strip[data-side="left"]  { --x-out: -100%; }
-.menu-strip[data-side="right"] { --x-out:  100%; }
-
-/* tiras pares con un fondo apenas distinto (cebra sutil) */
-.menu-strip:nth-child(even) { background: #f4f2ec; }
-
-/* ---- estados de la cortina ----
-   .is-open  → tiras a su sitio (entran)
-   .is-closing → tiras fuera otra vez (salen); el JS ya ha invertido
-   los --i para que la última en entrar sea la primera en salir.     */
-#menu-overlay.is-open .menu-strip { transform: translateX(0); }
-
-/* ---- la palabra de la categoría ----
-   Minúscula como en MENU_ITEMS, grande, hereda la serif de la web.  */
-.menu-word {
-  font-size: clamp(1.8rem, 7vh, 4rem);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  text-transform: lowercase;
-  pointer-events: none;   /* el click lo captura la tira entera */
+#menu-overlay.words-in .menu-word {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* la letra sorteada, pintada con el color de la categoría (--c lo
-   pone el JS por tira: var(--c-<id>)) */
+/* con el fondo ya cerrado, el halo sobra */
+#menu-overlay.bg-in .menu-word { text-shadow: none; }
+
+/* la letra sorteada, con el color de su categoría */
 .menu-letter {
   color: var(--c);
-  font-weight: inherit;   /* <b> no debe engordar la letra */
+  font-weight: inherit;
 }
 
 /* foco visible al llegar por teclado (accesibilidad) */
-.menu-strip:focus-visible {
-  outline: 2px solid #111;
-  outline-offset: -4px;
+.menu-word:focus-visible {
+  outline: 1px solid #000;
+  outline-offset: 4px;
 }
 
-/* respeta el ajuste del sistema: sin deslizamiento, aparecen y ya */
+/* respeta el ajuste del sistema: sin animación, aparecen y ya */
 @media (prefers-reduced-motion: reduce) {
-  .menu-strip { transition-duration: 1ms; transition-delay: 0ms; }
+  #menu-overlay, .menu-word { transition-duration: 1ms; transition-delay: 0ms; }
 }

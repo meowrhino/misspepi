@@ -20,7 +20,7 @@ html, body { height: 100%; }
 body {
   background: #fff;
   overflow: hidden; /* la web es una SPA a pantalla fija; cada vista scrollea por dentro */
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 img { -webkit-user-drag: none; user-select: none; }

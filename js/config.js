@@ -48,8 +48,17 @@ export const LEGS = {
 // ─── MENÚ ────────────────────────────────────────────────────────
 export const MENU = {
   autoOpenSeconds: 10,   // en el welcome: abrir el menú solo tras estos segundos
-  stripMs:         420,  // duración de la entrada/salida de cada tira
-  staggerMs:       90,   // retardo entre tiras (efecto cortina)
+
+  // la transición va en dos tiempos: primero APARECEN LAS PALABRAS
+  // (escalonadas), luego el fondo blanco se cierra detrás. Al elegir,
+  // a la inversa: el fondo se retira y las palabras se van las últimas.
+  wordMs:    500,        // fade de cada palabra
+  bgMs:      600,        // fade del fondo blanco
+  staggerMs: 70,         // retardo entre palabras
+
+  // cada apertura sortea un tamaño distinto por palabra (en rem)
+  sizeMin:   1.4,
+  sizeMax:   2.8,
 };
 
 // ítems del menú, en orden de cortina (1º entra por la izquierda, 2º por la

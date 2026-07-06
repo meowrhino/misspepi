@@ -39,6 +39,7 @@ export function createGalleryView(category) {
   let hasLoop = false;     // ¿hay clones? (solo con 2+ proyectos)
   const listeners = [];    // [{ target, type, fn }] para limpiar en unmount
   let scrollDebounce = null;
+  let resizeDebounce = null;
 
   // Registra un listener y lo apunta para poder retirarlo en unmount.
   function on(target, type, fn, opts) {
@@ -52,6 +53,7 @@ export function createGalleryView(category) {
     }
     listeners.length = 0;
     if (scrollDebounce) { clearTimeout(scrollDebounce); scrollDebounce = null; }
+    if (resizeDebounce) { clearTimeout(resizeDebounce); resizeDebounce = null; }
     root = track = null;
     realCount = 0;
     hasLoop = false;
@@ -74,6 +76,9 @@ export function createGalleryView(category) {
       img.alt = project.title || "";
       img.loading = "lazy";
       img.decoding = "async";
+      // fade-in individual al cargar (como mokakopa)
+      if (img.complete && img.naturalWidth) img.classList.add("loaded");
+      else on(img, "load", () => img.classList.add("loaded"), { once: true });
       stack.appendChild(img);
     }
 
@@ -162,6 +167,37 @@ export function createGalleryView(category) {
       // clon del primero → real primero (índice 1)
       track.scrollTo({ left: 1 * w, behavior: "auto" });
     }
+  }
+
+  // ── centrado de la PRIMERA imagen de cada columna (mokakopa invertido) ──
+  // mokakopa centra la primera imagen del scroll horizontal con un padding
+  // lateral dinámico; aquí es lo mismo en vertical: padding-top para que la
+  // primera imagen aparezca centrada en el viewport. Cada imagen tiene una
+  // altura distinta, así que se calcula por columna cuando su primera
+  // imagen carga, y se recalcula en resize.
+  function centerColumn(col) {
+    const stack = col.querySelector(".gallery__stack");
+    const img = stack?.querySelector(".gallery__img");
+    if (!stack) return;
+    if (!img || !img.clientHeight) { stack.style.paddingTop = ""; return; }
+    const pad = Math.max(20, (col.clientHeight - img.clientHeight) / 2);
+    stack.style.paddingTop = pad + "px";
+  }
+
+  function wireCentering() {
+    if (!track) return;
+    track.querySelectorAll(".gallery__col").forEach(col => {
+      const img = col.querySelector(".gallery__img");
+      if (!img) return;
+      if (img.complete && img.naturalWidth) centerColumn(col);
+      else on(img, "load", () => centerColumn(col), { once: true });
+    });
+    on(window, "resize", () => {
+      if (resizeDebounce) clearTimeout(resizeDebounce);
+      resizeDebounce = setTimeout(() => {
+        track?.querySelectorAll(".gallery__col").forEach(centerColumn);
+      }, 150);
+    });
   }
 
   // scrollend nativo si existe; si no, debounce tras el silencio de scroll.
@@ -269,6 +305,7 @@ export function createGalleryView(category) {
       }
 
       wireLoopListeners();
+      wireCentering();
 
       // La vista está lista cuando la primera imagen del primer proyecto
       // se ha decodificado (o salta el timeout de seguridad). El clon del
