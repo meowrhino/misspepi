@@ -1,0 +1,143 @@
+{
+  "categories": {
+    "photo": [
+      {
+        "slug": "isabella-lovestory",
+        "title": "ISABELLA LOVESTORY",
+        "folder": "PHOTOGRAPHY/ISABELLA LOVESTORY",
+        "images": [
+          "PHOTOGRAPHY/ISABELLA LOVESTORY/18.webp",
+          "PHOTOGRAPHY/ISABELLA LOVESTORY/19.webp",
+          "PHOTOGRAPHY/ISABELLA LOVESTORY/20.webp"
+        ],
+        "caption": ""
+      },
+      {
+        "slug": "metal-mag-editorial",
+        "title": "METAL MAG EDITORIAL",
+        "folder": "PHOTOGRAPHY/METAL MAG EDITORIAL",
+        "images": [
+          "PHOTOGRAPHY/METAL MAG EDITORIAL/metal (1).webp",
+          "PHOTOGRAPHY/METAL MAG EDITORIAL/metal (2).webp",
+          "PHOTOGRAPHY/METAL MAG EDITORIAL/metal (3).webp",
+          "PHOTOGRAPHY/METAL MAG EDITORIAL/metal (4).webp",
+          "PHOTOGRAPHY/METAL MAG EDITORIAL/metal (5).webp"
+        ],
+        "caption": ""
+      },
+      {
+        "slug": "naima-djoudi",
+        "title": "Naïma Djoudi",
+        "folder": "PHOTOGRAPHY/Naïma Djoudi",
+        "images": [
+          "PHOTOGRAPHY/Naïma Djoudi/1.webp",
+          "PHOTOGRAPHY/Naïma Djoudi/2.webp",
+          "PHOTOGRAPHY/Naïma Djoudi/3 (1).webp",
+          "PHOTOGRAPHY/Naïma Djoudi/4 (1).webp",
+          "PHOTOGRAPHY/Naïma Djoudi/5 (1).webp",
+          "PHOTOGRAPHY/Naïma Djoudi/6 (1).webp"
+        ],
+        "caption": ""
+      },
+      {
+        "slug": "niihai",
+        "title": "NIIHAI",
+        "folder": "PHOTOGRAPHY/NIIHAI",
+        "images": [
+          "PHOTOGRAPHY/NIIHAI/12.webp",
+          "PHOTOGRAPHY/NIIHAI/13.webp",
+          "PHOTOGRAPHY/NIIHAI/14.webp",
+          "PHOTOGRAPHY/NIIHAI/15.webp",
+          "PHOTOGRAPHY/NIIHAI/16.webp",
+          "PHOTOGRAPHY/NIIHAI/17.webp"
+        ],
+        "caption": ""
+      },
+      {
+        "slug": "november-mag-editorial",
+        "title": "NOVEMBER MAG EDITORIAL",
+        "folder": "PHOTOGRAPHY/NOVEMBER MAG EDITORIAL",
+        "images": [
+          "PHOTOGRAPHY/NOVEMBER MAG EDITORIAL/21.webp",
+          "PHOTOGRAPHY/NOVEMBER MAG EDITORIAL/22.webp",
+          "PHOTOGRAPHY/NOVEMBER MAG EDITORIAL/23.webp",
+          "PHOTOGRAPHY/NOVEMBER MAG EDITORIAL/24.webp"
+        ],
+        "caption": ""
+      },
+      {
+        "slug": "you-are-not-on-the-guest-list",
+        "title": "YOU ARE NOT ON THE GUEST LIST",
+        "folder": "PHOTOGRAPHY/YOU ARE NOT ON THE GUEST LIST",
+        "images": [
+          "PHOTOGRAPHY/YOU ARE NOT ON THE GUEST LIST/7.webp",
+          "PHOTOGRAPHY/YOU ARE NOT ON THE GUEST LIST/8.webp",
+          "PHOTOGRAPHY/YOU ARE NOT ON THE GUEST LIST/9.webp",
+          "PHOTOGRAPHY/YOU ARE NOT ON THE GUEST LIST/10.webp",
+          "PHOTOGRAPHY/YOU ARE NOT ON THE GUEST LIST/12.webp"
+        ],
+        "caption": ""
+      }
+    ],
+    "graphic": [
+      {
+        "slug": "blueprint-ep",
+        "title": "blueprint ep",
+        "folder": "GRAPHIC DESIGN/blueprint ep",
+        "images": [
+          "GRAPHIC DESIGN/blueprint ep/1.webp",
+          "GRAPHIC DESIGN/blueprint ep/2.webp"
+        ],
+        "caption": ""
+      },
+      {
+        "slug": "carteles",
+        "title": "carteles",
+        "folder": "GRAPHIC DESIGN/carteles",
+        "images": [
+          "GRAPHIC DESIGN/carteles/3.webp",
+          "GRAPHIC DESIGN/carteles/4.webp",
+          "GRAPHIC DESIGN/carteles/5.webp",
+          "GRAPHIC DESIGN/carteles/6.webp"
+        ],
+        "caption": ""
+      },
+      {
+        "slug": "extra-visuals",
+        "title": "extra visuals",
+        "folder": "GRAPHIC DESIGN/extra visuals",
+        "images": [
+          "GRAPHIC DESIGN/extra visuals/14.webp",
+          "GRAPHIC DESIGN/extra visuals/15.webp",
+          "GRAPHIC DESIGN/extra visuals/16.webp",
+          "GRAPHIC DESIGN/extra visuals/17.webp",
+          "GRAPHIC DESIGN/extra visuals/18.webp",
+          "GRAPHIC DESIGN/extra visuals/19.webp"
+        ],
+        "caption": ""
+      },
+      {
+        "slug": "ouineta-verificada",
+        "title": "ouineta verificada",
+        "folder": "GRAPHIC DESIGN/ouineta verificada",
+        "images": [
+          "GRAPHIC DESIGN/ouineta verificada/9.webp",
+          "GRAPHIC DESIGN/ouineta verificada/10.webp",
+          "GRAPHIC DESIGN/ouineta verificada/20 (1).webp"
+        ],
+        "caption": ""
+      }
+    ],
+    "video": []
+  },
+  "about": {
+    "textos": [
+      "[texto provisional] Miss Pepi es fotógrafa y diseñadora gráfica. Este párrafo es un placeholder: edítalo a mano en data.json.",
+      "[texto provisional] Segundo párrafo de ejemplo, para probar el layout de la página about. Sustitúyelo por el texto real."
+    ]
+  },
+  "contact": {
+    "email": "hello@misspepi.com",
+    "instagram": "https://instagram.com/misspepi"
+  }
+}

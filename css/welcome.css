@@ -1,14 +1,8 @@
 /* ════════════════════════════════════════════════════════════════
    WELCOME · Miss Pepi   ·   mobile-first
-   La posición/tamaño de espiral y piernas se inyecta desde js/config.js.
+   La posición/tamaño de espiral y piernas se inyecta desde js/config.js
+   (por breakpoint); aquí solo va lo que no cambia con la config.
    ════════════════════════════════════════════════════════════════ */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
-body {
-  background: #fff;
-  overflow: hidden;
-  font-family: Georgia, "Times New Roman", serif;
-}
 
 /* ---- fondo: espiral hipnótica girando ----
    width/height/left/top reales los calcula js/welcome.js (spiralDiameterPx):
@@ -25,6 +19,17 @@ body {
 #spiralWrap svg { width: 100%; height: 100%; display: block; }
 #spiralGroup { transform-origin: 500px 500px; }
 
+/* ---- ojo de la espiral: zona clicable que abre el menú ----
+   tamaño/posición los pone js/welcome.js (sigue al centro de la espiral) */
+#spiralEye {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  border: none; border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  z-index: 4;
+}
+
 /* ---- logo Miss Pepi ---- */
 .logo {
   position: fixed; top: 3vh; left: 5vw;
@@ -36,8 +41,9 @@ body {
 }
 
 /* ---- capa frontal: piernas ----
-   height / bottom / side los pone config.js. width:auto conserva la
-   proporción, así al ser tan altas el top se sale de pantalla.         */
+   height / anclajes los pone js/welcome.js según el breakpoint:
+   escritorio = de pie abajo · móvil = colgando del borde superior
+   con vaivén derecha↔izquierda. width:auto conserva la proporción. */
 .legs {
   position: fixed;
   width: auto;

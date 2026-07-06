@@ -1,80 +1,158 @@
 // ════════════════════════════════════════════════════════════════
-//  ARRANQUE  ·  dibuja la espiral, coloca las capas y la anima
-//  (todos los valores salen de js/config.js — única fuente de verdad)
+//  WELCOME  ·  espiral + piernas + disparadores del menú
+//  (los valores salen de js/config.js — única fuente de verdad)
+//
+//  Vista con { mount, unmount } para el router. Además exporta
+//  rebuildWelcome() para que el devpanel previsualice en caliente.
 // ════════════════════════════════════════════════════════════════
+import { MENU, isMobile, activeSpiral, activeLegs } from "./config.js";
+import { renderSpiral, SPIRAL_GEOMETRY } from "./spiral.js";
+import { openMenu } from "./menu.js";
 
 // ANCHOR_PCT: punto de la imagen de piernas (en % de su ancho) que se
-// alinea con LEGS.anchorX. 83% = pie derecho → quedan a la derecha
-// igual en móvil y desktop. Es propio del asset: si cambias la imagen,
-// recalcúlalo (50 = centro, 18 = pie izquierdo).
+// alinea con anchorX en escritorio. 83% = pie derecho. Es propio del
+// asset: si cambias la imagen, recalcúlalo (50 = centro, 18 = pie izq).
 const ANCHOR_PCT = 83;
 
 let spinAnim = null;
+let sweepAnim = null;
+let menuTimer = null;
+let mounted = false;
 
 // El wrap de la espiral es un círculo inscrito en un cuadrado; para que
 // nunca se vea la esquina blanca hace falta que las BANDAS (no solo el
-// disco de fondo) alcancen la esquina de pantalla más lejana al centro
-// (SPIRAL.centerX/centerY puede estar en cualquier sitio, incluso pegado
-// a un borde). worstBandsRadius calcula el radio que las bandas alcanzan
-// EN EL PEOR ÁNGULO (ver spiral.js) para las vueltas/brazos/hueco actuales;
-// se recalcula en cada resize y cada cambio del panel.
-function spiralDiameterPx() {
+// disco de fondo) alcancen la esquina de pantalla más lejana al centro.
+// worstBandsRadius calcula el radio que las bandas alcanzan EN EL PEOR
+// ÁNGULO (ver spiral.js); se recalcula en cada resize y cambio del panel.
+function spiralDiameterPx(cfg) {
   const W = window.innerWidth, H = window.innerHeight;
-  const cx = (SPIRAL.centerX / 100) * W;
-  const cy = (SPIRAL.centerY / 100) * H;
+  const cx = (cfg.centerX / 100) * W;
+  const cy = (cfg.centerY / 100) * H;
   const corners = [[0, 0], [W, 0], [0, H], [W, H]];
   const farthest = Math.max(...corners.map(([x, y]) => Math.hypot(cx - x, cy - y)));
-  const bandsRatio = SPIRAL_GEOMETRY.worstBandsRadius(SPIRAL) / SPIRAL_GEOMETRY.discR;
+  const bandsRatio = SPIRAL_GEOMETRY.worstBandsRadius(cfg) / SPIRAL_GEOMETRY.discR;
   const SAFETY = 1.05; // margen pequeño, solo para redondeos/antialiasing
-  const discRadius = (farthest * SAFETY) / bandsRatio;
-  return discRadius * 2;
+  return ((farthest * SAFETY) / bandsRatio) * 2;
 }
 
-// Coloca la espiral y las piernas según el estado ACTUAL de SPIRAL/LEGS.
-// Se puede llamar tantas veces como haga falta (el panel de ajustes la usa
-// en cada cambio de slider para previsualizar en caliente, y el resize
-// para que la espiral siga cubriendo toda la pantalla).
+// Coloca espiral, ojo clicable y piernas según la config ACTIVA del
+// breakpoint actual. Idempotente: el panel la llama en cada slider y el
+// resize en cada cambio de tamaño.
 function applyLayout() {
+  const spiral = activeSpiral();
   const wrap = document.getElementById("spiralWrap");
-  const legs = document.querySelector(".legs");
+  const eye  = document.getElementById("spiralEye");
+  const legs = document.querySelector("#welcome-view .legs");
 
-  const d = spiralDiameterPx() + "px";
-  wrap.style.width  = d;
-  wrap.style.height = d;
-  wrap.style.left = SPIRAL.centerX + "dvw";
-  wrap.style.top  = SPIRAL.centerY + "dvh";
+  const d = spiralDiameterPx(spiral);
+  wrap.style.width  = d + "px";
+  wrap.style.height = d + "px";
+  wrap.style.left = spiral.centerX + "dvw";
+  wrap.style.top  = spiral.centerY + "dvh";
 
-  legs.style.height    = LEGS.size   + "dvh";
-  legs.style.bottom    = LEGS.bottom + "dvh";
-  legs.style.left      = LEGS.anchorX + "dvw";
-  legs.style.right     = "auto";
-  legs.style.transform = "translateX(-" + ANCHOR_PCT + "%)";
+  // ojo clicable: círculo centrado en el ojo de la espiral, al menos 44px
+  // (área mínima táctil) aunque el hueco dibujado sea más pequeño
+  const eyeD = Math.max(44, (spiral.hole / SPIRAL_GEOMETRY.discR) * d);
+  eye.style.width  = eyeD + "px";
+  eye.style.height = eyeD + "px";
+  eye.style.left = spiral.centerX + "dvw";
+  eye.style.top  = spiral.centerY + "dvh";
+
+  applyLegs(legs);
 }
 
-window.addEventListener("resize", applyLayout);
+// Piernas: en escritorio de pie sobre el borde inferior (ancladas por el
+// pie derecho); en móvil cuelgan del borde superior y el vaivén las lleva
+// de lado a lado (la animación la pone applySweep).
+function applyLegs(legs) {
+  const cfg = activeLegs();
+  legs.style.height = cfg.size + "dvh";
+  if (isMobile()) {
+    legs.style.top    = "0";
+    legs.style.bottom = "auto";
+    legs.style.left   = "0";                 // el vaivén manda vía transform
+    legs.style.transform = "none";
+  } else {
+    legs.style.top    = "auto";
+    legs.style.bottom = cfg.bottom + "dvh";
+    legs.style.left   = cfg.anchorX + "dvw";
+    legs.style.transform = "translateX(-" + ANCHOR_PCT + "%)";
+  }
+  applySweep(legs, cfg);
+}
+
+// (Re)inicia el vaivén móvil por GPU; en escritorio lo apaga.
+function applySweep(legs, cfg) {
+  if (sweepAnim) { sweepAnim.cancel(); sweepAnim = null; }
+  if (!isMobile()) return;
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) {
+    legs.style.left = "50dvw";
+    legs.style.transform = "translateX(-50%)";
+    return;
+  }
+  sweepAnim = legs.animate(
+    [
+      { left: cfg.sweepMin + "dvw", transform: "translateX(-50%)" },
+      { left: cfg.sweepMax + "dvw", transform: "translateX(-50%)" },
+    ],
+    {
+      duration:  cfg.sweepSeconds * 1000,
+      iterations: Infinity,
+      direction: "alternate",
+      easing:    "ease-in-out",
+    }
+  );
+}
 
 // (Re)inicia el giro por GPU con la duración/sentido actuales.
 function applySpin() {
   if (spinAnim) spinAnim.cancel();
   if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const spiral = activeSpiral();
   const g = document.getElementById("spiralGroup");
   spinAnim = g.animate(
     [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
     {
-      duration:  SPIRAL.spinSeconds * 1000,
+      duration:  spiral.spinSeconds * 1000,
       iterations: Infinity,
       easing:    "linear",
-      direction: SPIRAL.reverse ? "reverse" : "normal",
+      direction: spiral.reverse ? "reverse" : "normal",
     }
   );
 }
 
-// Redibuja todo (espiral + capas + giro) desde el estado actual de la config.
-// Es la función que reutiliza el panel de ajustes tras cada cambio.
-function rebuildWelcome() {
-  renderSpiral(SPIRAL);
+// Redibuja todo (espiral + capas + animaciones) desde la config actual.
+// La reutiliza el panel de ajustes tras cada cambio.
+export function rebuildWelcome() {
+  renderSpiral(activeSpiral());
   applyLayout();
   applySpin();
 }
 
-rebuildWelcome();
+function armMenuTimer() {
+  clearTimeout(menuTimer);
+  menuTimer = setTimeout(openMenu, MENU.autoOpenSeconds * 1000);
+}
+
+window.addEventListener("resize", () => { if (mounted) rebuildWelcome(); });
+
+document.getElementById("spiralEye").addEventListener("click", () => {
+  clearTimeout(menuTimer);
+  openMenu();
+});
+
+export const welcomeView = {
+  async mount() {
+    document.getElementById("welcome-view").hidden = false;
+    mounted = true;
+    rebuildWelcome();
+    armMenuTimer();
+  },
+  unmount() {
+    mounted = false;
+    clearTimeout(menuTimer);
+    if (spinAnim)  { spinAnim.cancel();  spinAnim = null; }
+    if (sweepAnim) { sweepAnim.cancel(); sweepAnim = null; }
+    document.getElementById("welcome-view").hidden = true;
+  },
+};

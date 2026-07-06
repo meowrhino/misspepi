@@ -1,0 +1,96 @@
+/* ════════════════════════════════════════════════════════════════
+   MENÚ CORTINA · Miss Pepi
+   6 tiras horizontales apiladas que cubren la pantalla. Entran
+   alternando lados (1ª izq, 2ª der…) y escalonadas; al elegir, la
+   cortina se queda hasta que la vista carga y luego sale en orden
+   inverso. La lógica (clases, tiempos, orden) vive en js/menu.js;
+   aquí solo la estética y las transiciones.
+
+   Tiempos: llegan como custom properties desde el JS (no duplicamos
+   los números de config.js):
+     --strip-ms    duración de entrada/salida de cada tira
+     --stagger-ms  retardo entre tiras (el "efecto cortina")
+   Por tira, el JS pone --i (posición en el escalonado) y --c (color
+   de la categoría, para la letra sorteada).
+   ════════════════════════════════════════════════════════════════ */
+
+/* ---- overlay: pila de tiras a pantalla completa ----
+   Por encima de #app-view / #welcome-view, por debajo del devpanel
+   (9999). [hidden] lo apaga del todo entre aperturas.               */
+#menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100dvh;
+}
+#menu-overlay[hidden] { display: none; }
+
+/* ---- cada tira: 1/6 del alto, ancho completo ----
+   Fondo opaco (tapa del todo lo de debajo). Estética sobria: blanco
+   con una línea fina de separación y las tiras pares con un blanco
+   apenas roto, para que se lea el apilado sin ruido.                */
+.menu-strip {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-bottom: 1px solid #111;
+  background: #fff;
+  color: #111;
+  font-family: Georgia, "Times New Roman", serif;
+  cursor: pointer;
+
+  /* estado de reposo = fuera de pantalla, según el lado de entrada.
+     .is-open las trae a 0; al cerrar vuelven a este mismo desplazamiento. */
+  transform: translateX(var(--x-out, -100%));
+  transition: transform var(--strip-ms, 420ms) cubic-bezier(0.22, 1, 0.36, 1);
+  /* el retardo escalonado sale del índice --i que pone el JS */
+  transition-delay: calc(var(--i, 0) * var(--stagger-ms, 90ms));
+}
+.menu-strip:last-child { border-bottom: none; }
+.menu-strip[data-side="left"]  { --x-out: -100%; }
+.menu-strip[data-side="right"] { --x-out:  100%; }
+
+/* tiras pares con un fondo apenas distinto (cebra sutil) */
+.menu-strip:nth-child(even) { background: #f4f2ec; }
+
+/* ---- estados de la cortina ----
+   .is-open  → tiras a su sitio (entran)
+   .is-closing → tiras fuera otra vez (salen); el JS ya ha invertido
+   los --i para que la última en entrar sea la primera en salir.     */
+#menu-overlay.is-open .menu-strip { transform: translateX(0); }
+
+/* ---- la palabra de la categoría ----
+   Minúscula como en MENU_ITEMS, grande, hereda la serif de la web.  */
+.menu-word {
+  font-size: clamp(1.8rem, 7vh, 4rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  pointer-events: none;   /* el click lo captura la tira entera */
+}
+
+/* la letra sorteada, pintada con el color de la categoría (--c lo
+   pone el JS por tira: var(--c-<id>)) */
+.menu-letter {
+  color: var(--c);
+  font-weight: inherit;   /* <b> no debe engordar la letra */
+}
+
+/* foco visible al llegar por teclado (accesibilidad) */
+.menu-strip:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: -4px;
+}
+
+/* respeta el ajuste del sistema: sin deslizamiento, aparecen y ya */
+@media (prefers-reduced-motion: reduce) {
+  .menu-strip { transition-duration: 1ms; transition-delay: 0ms; }
+}

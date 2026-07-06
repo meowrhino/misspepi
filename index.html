@@ -4,24 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Miss Pepi</title>
+  <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/welcome.css">
+  <link rel="stylesheet" href="css/menu.css">
+  <link rel="stylesheet" href="css/gallery.css">
+  <link rel="stylesheet" href="css/pages.css">
 </head>
 <body>
-  <!-- fondo: espiral SVG (se dibuja y anima desde js/) -->
-  <div id="spiralWrap" aria-hidden="true">
-    <svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
-      <circle id="spiralDisc" cx="500" cy="500" r="500" fill="#fff"/>
-      <g id="spiralGroup"></g>
-    </svg>
+  <!-- ── vista WELCOME (markup estático; welcome.js la muestra/oculta) ── -->
+  <div id="welcome-view">
+    <!-- fondo: espiral SVG (se dibuja y anima desde js/) -->
+    <div id="spiralWrap" aria-hidden="true">
+      <svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+        <circle id="spiralDisc" cx="500" cy="500" r="500" fill="#fff"/>
+        <g id="spiralGroup"></g>
+      </svg>
+    </div>
+    <img class="logo" src="ASSETS/logo.webp" alt="Miss Pepi">
+    <img class="legs" src="ASSETS/piernas/legs.png" alt="">
+    <!-- zona clicable sobre el ojo de la espiral → abre el menú -->
+    <button id="spiralEye" aria-label="abrir menú"></button>
   </div>
 
-  <img class="logo" src="ASSETS/logo.webp" alt="Miss Pepi">
-  <img class="legs" src="ASSETS/piernas/legs.png" alt="">
+  <!-- ── resto de vistas (galerías, contact, about) — las monta el router ── -->
+  <main id="app-view" hidden></main>
 
-  <script src="js/config.js"></script>
-  <script src="js/spiral.js"></script>
-  <script src="js/welcome.js"></script>
-  <!-- panel de ajustes en vivo (clica la página para abrir) · quítalo cuando cierres el diseño -->
-  <script src="js/devpanel.js"></script>
+  <!-- ── menú cortina (overlay; lo construye js/menu.js) ── -->
+  <div id="menu-overlay" hidden></div>
+
+  <script type="module" src="js/main.js"></script>
+  <!-- panel de ajustes en vivo (barra espaciadora) · quítalo cuando cierres el diseño -->
+  <script type="module" src="js/devpanel.js"></script>
 </body>
 </html>

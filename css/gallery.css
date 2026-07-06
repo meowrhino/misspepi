@@ -1,0 +1,121 @@
+/* ════════════════════════════════════════════════════════════════
+   GALERÍAS · Miss Pepi   ·   mokakopa invertido
+   La estructura y el color de acento (--accent = var(--c-<categoría>))
+   los inyecta js/gallery.js; aquí va el layout del scroll cruzado.
+   Estética: fondo blanco, serif del sitio, que manden las imágenes.
+   ════════════════════════════════════════════════════════════════ */
+
+/* raíz de la vista: ocupa el #app-view (position:fixed; inset:0) */
+.gallery {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  color: #111;
+}
+
+/* ---- track HORIZONTAL: pasa de proyecto con snap x mandatory ----
+   Cada columna encaja a pantalla completa; la scrollbar se oculta
+   (se navega con gesto/rueda). El scroll-snap manda en el eje X.     */
+.gallery__track {
+  height: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain; /* evita el "atrás" del navegador al llegar al borde */
+  scrollbar-width: none;          /* Firefox */
+}
+.gallery__track::-webkit-scrollbar { display: none; } /* WebKit/Blink */
+
+/* ---- COLUMNA = un proyecto: 100dvw × 100dvh, snap al inicio ----
+   Dentro se scrollea en VERTICAL (imágenes apiladas + ficha al final);
+   esa scrollbar sí la dejamos, pero discreta.                         */
+.gallery__col {
+  flex: 0 0 100dvw;
+  width: 100dvw;
+  height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;       /* un gesto = un proyecto, sin saltarse ninguno */
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;          /* Firefox: discreta */
+}
+.gallery__col::-webkit-scrollbar { width: 6px; }
+.gallery__col::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 3px;
+}
+
+/* ---- pila de imágenes: ancho máximo 100%, alto automático ---- */
+.gallery__stack {
+  display: block;
+}
+.gallery__img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---- ficha técnica: al final del scroll vertical de cada columna ----
+   Un acento sutil de la categoría (var --accent) en la línea superior. */
+.gallery__card {
+  padding: 2rem 1.5rem 3rem;
+  border-top: 2px solid var(--accent, #111);
+  text-align: center;
+}
+.gallery__title {
+  font-weight: normal;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+}
+.gallery__caption {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #444;
+  max-width: 40rem;
+  margin: 0 auto 1.25rem;
+}
+
+/* ---- botón "menu": reabre la cortina (acento de la categoría) ---- */
+.gallery__menu-btn {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.4rem 1.4rem;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--accent, #111);
+  background: transparent;
+  border: 1px solid var(--accent, #111);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.gallery__menu-btn:hover,
+.gallery__menu-btn:focus-visible {
+  background: var(--accent, #111);
+  color: #fff;
+}
+
+/* ---- placeholder (categoría vacía / error): centrado, con su color ---- */
+.gallery__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+}
+.gallery__empty-text {
+  font-size: 1.5rem;
+  letter-spacing: 0.03em;
+  color: var(--accent, #111);
+}
